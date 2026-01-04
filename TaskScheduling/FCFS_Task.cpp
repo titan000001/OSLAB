@@ -4,53 +4,47 @@ using namespace std;
 
 struct Process {
     int id;
-    int burst_time;
-    int waiting_time;
-    int turnaround_time;
+    int burstTime;
+    int waitingTime;
+    int turnaroundTime;
 };
 
-void fcfs_scheduling(Process proc[], int n) {
-    proc[0].waiting_time = 0;
+void calculateFCFS(Process processes[], int processCount) {
+    processes[0].waitingTime = 0; // First process has 0 waiting time
 
-    for (int i = 1; i < n; i++) {
-        proc[i].waiting_time = proc[i-1].burst_time + proc[i-1].waiting_time;
+    // Calculate waiting time for each process
+    for (int i = 1; i < processCount; i++) {
+        processes[i].waitingTime = processes[i - 1].burstTime + processes[i - 1].waitingTime;
     }
 
-    for (int i = 0; i < n; i++) {
-        proc[i].turnaround_time = proc[i].burst_time + proc[i].waiting_time;
-    }
+    float totalWaitingTime = 0;
+    float totalTurnaroundTime = 0;
 
-    cout << "--- FCFS Task Scheduling Algorithm ---" << endl;
-    cout << "Process ID | Burst Time | Waiting Time | Turnaround Time" << endl;
-    cout << "--------------------------------------------------------" << endl;
+    cout << "ProcessID\t| BurstTime\t| WaitingTime\t| TurnAroundTime" << endl;
 
-    int total_wt = 0;
-    int total_tat = 0;
-
-    for (int i = 0; i < n; i++) {
-        total_wt += proc[i].waiting_time;
-        total_tat += proc[i].turnaround_time;
+    // Calculate turnaround time and print details for each process
+    for (int i = 0; i < processCount; i++) {
+        processes[i].turnaroundTime = processes[i].burstTime + processes[i].waitingTime;
         
-        cout << "    " << proc[i].id << "      |     " 
-             << proc[i].burst_time << "      |      " 
-             << proc[i].waiting_time << "       |        " 
-             << proc[i].turnaround_time << endl;
+        totalWaitingTime += processes[i].waitingTime;
+        totalTurnaroundTime += processes[i].turnaroundTime;
+        
+        cout << processes[i].id << "\t\t| " << processes[i].burstTime << "\t\t| " << processes[i].waitingTime << "\t\t| " << processes[i].turnaroundTime << endl;
     }
 
-    cout << "--------------------------------------------------------" << endl;
-    cout << "Average Waiting Time: " << (float)total_wt / n << endl;
-    cout << "Average Turnaround Time: " << (float)total_tat / n << endl;
+    cout << "\nAverage Waiting Time: " << totalWaitingTime / processCount << endl;
+    cout << "Average Turnaround Time: " << totalTurnaroundTime / processCount << endl;
 }
 
 int main() {
-    Process processes[] = {
+    Process proc[] = {
         {1, 10, 0, 0},
         {2, 5, 0, 0},
         {3, 8, 0, 0}
     };
-    int n = sizeof(processes) / sizeof(processes[0]);
+    int processCount = sizeof(proc) / sizeof(proc[0]);
 
-    fcfs_scheduling(processes, n);
+    calculateFCFS(proc, processCount);
 
     return 0;
 }

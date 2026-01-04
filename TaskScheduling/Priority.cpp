@@ -5,62 +5,56 @@ using namespace std;
 
 struct Process {
     int id;
-    int burst_time;
+    int burstTime;
     int priority;
-    int waiting_time;
-    int turnaround_time;
+    int waitingTime;
+    int turnaroundTime;
 };
 
+// Comparator to sort processes based on priority (lower value = higher priority)
 bool comparePriority(Process a, Process b) {
     return a.priority < b.priority;
 }
 
-void priority_scheduling(Process proc[], int n) {
-    sort(proc, proc + n, comparePriority);
+void calculatePriorityScheduling(Process processes[], int processCount) {
+    // Sort processes based on priority
+    sort(processes, processes + processCount, comparePriority);
 
-    proc[0].waiting_time = 0;
+    processes[0].waitingTime = 0; // First process has 0 waiting time
 
-    for (int i = 1; i < n; i++) {
-        proc[i].waiting_time = proc[i-1].burst_time + proc[i-1].waiting_time;
+    // Calculate waiting time for each process
+    for (int i = 1; i < processCount; i++) {
+        processes[i].waitingTime = processes[i - 1].burstTime + processes[i - 1].waitingTime;
     }
 
-    for (int i = 0; i < n; i++) {
-        proc[i].turnaround_time = proc[i].burst_time + proc[i].waiting_time;
-    }
+    float totalWaitingTime = 0;
+    float totalTurnaroundTime = 0;
 
-    cout << "--- Priority Task Scheduling Algorithm (Non-Preemptive) ---" << endl;
-    cout << "Lower Value = Higher Priority" << endl;
-    cout << "Process ID | Priority | Burst Time | Waiting Time | Turnaround Time" << endl;
-    cout << "-------------------------------------------------------------------" << endl;
+    cout << "ProcessID\t| Priority\t| BurstTime\t| WaitingTime\t| TurnAroundTime" << endl;
 
-    int total_wt = 0;
-    int total_tat = 0;
-
-    for (int i = 0; i < n; i++) {
-        total_wt += proc[i].waiting_time;
-        total_tat += proc[i].turnaround_time;
+    // Calculate turnaround time and print details for each process
+    for (int i = 0; i < processCount; i++) {
+        processes[i].turnaroundTime = processes[i].burstTime + processes[i].waitingTime;
         
-        cout << "    " << proc[i].id << "      |    " 
-             << proc[i].priority << "     |     "
-             << proc[i].burst_time << "      |      " 
-             << proc[i].waiting_time << "       |        " 
-             << proc[i].turnaround_time << endl;
+        totalWaitingTime += processes[i].waitingTime;
+        totalTurnaroundTime += processes[i].turnaroundTime;
+        
+        cout << processes[i].id << "\t\t| " << processes[i].priority << "\t\t| " << processes[i].burstTime << "\t\t| " << processes[i].waitingTime << "\t\t| " << processes[i].turnaroundTime << endl;
     }
 
-    cout << "-------------------------------------------------------------------" << endl;
-    cout << "Average Waiting Time: " << (float)total_wt / n << endl;
-    cout << "Average Turnaround Time: " << (float)total_tat / n << endl;
+    cout << "\nAverage Waiting Time: " << totalWaitingTime / processCount << endl;
+    cout << "Average Turnaround Time: " << totalTurnaroundTime / processCount << endl;
 }
 
 int main() {
-    Process processes[] = {
+    Process proc[] = {
         {1, 10, 2, 0, 0},
         {2, 5, 0, 0, 0},
         {3, 8, 1, 0, 0}
     };
-    int n = sizeof(processes) / sizeof(processes[0]);
+    int processCount = sizeof(proc) / sizeof(proc[0]);
 
-    priority_scheduling(processes, n);
+    calculatePriorityScheduling(proc, processCount);
 
     return 0;
 }

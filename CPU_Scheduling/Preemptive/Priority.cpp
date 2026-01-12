@@ -6,83 +6,83 @@
 using namespace std;
 
 struct Process {
-    int id;
-    int at;
-    int bt;
+    int process_id;
+    int arrival_time;
+    int burst_time;
     int priority;
-    int rem_bt;
-    int ct;
-    int tat;
-    int wt;
-    bool completed;
+    int remaining_burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    bool is_completed;
 };
 
 int main() {
-    int n;
+    int number_of_processes;
     cout << "Enter number of processes: ";
-    cin >> n;
+    cin >> number_of_processes;
 
-    vector<Process> p(n);
+    vector<Process> processes(number_of_processes);
     cout << "Enter Arrival Time, Burst Time and Priority (Lower value = Higher Priority) for each process:\n";
-    for (int i = 0; i < n; i++) {
-        p[i].id = i + 1;
+    for (int i = 0; i < number_of_processes; i++) {
+        processes[i].process_id = i + 1;
         cout << "P" << i + 1 << ": ";
-        cin >> p[i].at >> p[i].bt >> p[i].priority;
-        p[i].rem_bt = p[i].bt;
-        p[i].completed = false;
+        cin >> processes[i].arrival_time >> processes[i].burst_time >> processes[i].priority;
+        processes[i].remaining_burst_time = processes[i].burst_time;
+        processes[i].is_completed = false;
     }
 
-    int currentTime = 0;
-    int completed = 0;
+    int current_time = 0;
+    int completed_processes_count = 0;
 
     // Simulation loop: increment time by 1 and check highest priority
-    while(completed < n) {
-        int idx = -1;
-        int minPriority = INT_MAX;
+    while(completed_processes_count < number_of_processes) {
+        int process_index = -1;
+        int minimum_priority = INT_MAX;
 
-        for(int i=0; i<n; i++) {
-            if(p[i].at <= currentTime && !p[i].completed) {
-                if(p[i].priority < minPriority) {
-                    minPriority = p[i].priority;
-                    idx = i;
+        for(int i=0; i< number_of_processes; i++) {
+            if(processes[i].arrival_time <= current_time && !processes[i].is_completed) {
+                if(processes[i].priority < minimum_priority) {
+                    minimum_priority = processes[i].priority;
+                    process_index = i;
                 }
                 // Tie-breaking: FCFS logic
-                if(p[i].priority == minPriority) {
-                    if(p[i].at < p[idx].at) idx = i;
+                if(processes[i].priority == minimum_priority) {
+                    if(processes[i].arrival_time < processes[process_index].arrival_time) process_index = i;
                 }
             }
         }
 
-        if(idx != -1) {
-            p[idx].rem_bt--;
-            currentTime++;
+        if(process_index != -1) {
+            processes[process_index].remaining_burst_time--;
+            current_time++;
             
-            if(p[idx].rem_bt == 0) {
-                p[idx].ct = currentTime;
-                p[idx].tat = p[idx].ct - p[idx].at;
-                p[idx].wt = p[idx].tat - p[idx].bt;
-                p[idx].completed = true;
-                completed++;
+            if(processes[process_index].remaining_burst_time == 0) {
+                processes[process_index].completion_time = current_time;
+                processes[process_index].turnaround_time = processes[process_index].completion_time - processes[process_index].arrival_time;
+                processes[process_index].waiting_time = processes[process_index].turnaround_time - processes[process_index].burst_time;
+                processes[process_index].is_completed = true;
+                completed_processes_count++;
             }
         } else {
-            currentTime++;
+            current_time++;
         }
     }
 
     cout << "\nProcess\tAT\tBT\tPri\tCT\tTAT\tWT\n";
-    for (int i = 0; i < n; i++) {
-        cout << "P" << p[i].id << "\t" << p[i].at << "\t" << p[i].bt << "\t" << p[i].priority << "\t" << p[i].ct << "\t" << p[i].tat << "\t" << p[i].wt << endl;
+    for (int i = 0; i < number_of_processes; i++) {
+        cout << "P" << processes[i].process_id << "\t" << processes[i].arrival_time << "\t" << processes[i].burst_time << "\t" << processes[i].priority << "\t" << processes[i].completion_time << "\t" << processes[i].turnaround_time << "\t" << processes[i].waiting_time << endl;
     }
 
-    float avgTAT = 0, avgWT = 0;
-    for(int i=0; i<n; i++){
-        avgTAT += p[i].tat;
-        avgWT += p[i].wt;
+    float average_turnaround_time = 0, average_waiting_time = 0;
+    for(int i=0; i<number_of_processes; i++){
+        average_turnaround_time += processes[i].turnaround_time;
+        average_waiting_time += processes[i].waiting_time;
     }
 
     cout << "\nAverage Output:\n";
-    cout << "Average Turn Around Time: " << avgTAT/n << endl;
-    cout << "Average Waiting Time: " << avgWT/n << endl;
+    cout << "Average Turn Around Time: " << average_turnaround_time/number_of_processes << endl;
+    cout << "Average Waiting Time: " << average_waiting_time/number_of_processes << endl;
 
     return 0;
 }

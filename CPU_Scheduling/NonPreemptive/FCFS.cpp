@@ -5,58 +5,58 @@
 using namespace std;
 
 struct Process {
-    int id;
-    int at; // Arrival Time
-    int bt; // Burst Time
-    int ct; // Completion Time
-    int tat; // Turn Around Time
-    int wt; // Waiting Time
+    int process_id;
+    int arrival_time; // Arrival Time
+    int burst_time; // Burst Time
+    int completion_time; // Completion Time
+    int turnaround_time; // Turn Around Time
+    int waiting_time; // Waiting Time
 };
 
 bool compareAT(Process a, Process b) {
-    return a.at < b.at;
+    return a.arrival_time < b.arrival_time;
 }
 
 int main() {
-    int n;
+    int number_of_processes;
     cout << "Enter number of processes: ";
-    cin >> n;
+    cin >> number_of_processes;
 
-    vector<Process> p(n);
+    vector<Process> processes(number_of_processes);
     cout << "Enter Arrival Time and Burst Time for each process:\n";
-    for (int i = 0; i < n; i++) {
-        p[i].id = i + 1;
+    for (int i = 0; i < number_of_processes; i++) {
+        processes[i].process_id = i + 1;
         cout << "P" << i + 1 << ": ";
-        cin >> p[i].at >> p[i].bt;
+        cin >> processes[i].arrival_time >> processes[i].burst_time;
     }
 
-    sort(p.begin(), p.end(), compareAT);
+    sort(processes.begin(), processes.end(), compareAT);
 
-    int currentTime = 0;
-    for (int i = 0; i < n; i++) {
-        if (currentTime < p[i].at) {
-            currentTime = p[i].at;
+    int current_time = 0;
+    for (int i = 0; i < number_of_processes; i++) {
+        if (current_time < processes[i].arrival_time) {
+            current_time = processes[i].arrival_time;
         }
-        p[i].ct = currentTime + p[i].bt;
-        currentTime = p[i].ct;
-        p[i].tat = p[i].ct - p[i].at;
-        p[i].wt = p[i].tat - p[i].bt;
+        processes[i].completion_time = current_time + processes[i].burst_time;
+        current_time = processes[i].completion_time;
+        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
     }
 
     cout << "\nProcess\tAT\tBT\tCT\tTAT\tWT\n";
-    for (int i = 0; i < n; i++) {
-        cout << "P" << p[i].id << "\t" << p[i].at << "\t" << p[i].bt << "\t" << p[i].ct << "\t" << p[i].tat << "\t" << p[i].wt << endl;
+    for (int i = 0; i < number_of_processes; i++) {
+        cout << "P" << processes[i].process_id << "\t" << processes[i].arrival_time << "\t" << processes[i].burst_time << "\t" << processes[i].completion_time << "\t" << processes[i].turnaround_time << "\t" << processes[i].waiting_time << endl;
     }
 
-    float avgTAT = 0, avgWT = 0;
-    for(int i=0; i<n; i++){
-        avgTAT += p[i].tat;
-        avgWT += p[i].wt;
+    float average_turnaround_time = 0, average_waiting_time = 0;
+    for(int i=0; i<number_of_processes; i++){
+        average_turnaround_time += processes[i].turnaround_time;
+        average_waiting_time += processes[i].waiting_time;
     }
 
     cout << "\nAverage Output:\n";
-    cout << "Average Turn Around Time: " << avgTAT/n << endl;
-    cout << "Average Waiting Time: " << avgWT/n << endl;
+    cout << "Average Turn Around Time: " << average_turnaround_time/number_of_processes << endl;
+    cout << "Average Waiting Time: " << average_waiting_time/number_of_processes << endl;
 
     return 0;
 }

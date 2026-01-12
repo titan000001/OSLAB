@@ -6,47 +6,47 @@
 using namespace std;
 
 int main() {
-    int n, head;
+    int number_of_requests, initial_head_position;
     cout << "Enter number of requests: ";
-    cin >> n;
+    cin >> number_of_requests;
     
-    vector<int> requests(n);
-    vector<bool> visited(n, false);
+    vector<int> request_queue(number_of_requests);
+    vector<bool> is_request_processed(number_of_requests, false);
     
     cout << "Enter the requests sequence: ";
-    for(int i=0; i<n; i++) {
-        cin >> requests[i];
+    for(int i=0; i<number_of_requests; i++) {
+        cin >> request_queue[i];
     }
     
     cout << "Enter initial head position: ";
-    cin >> head;
+    cin >> initial_head_position;
     
     int total_seek_time = 0;
-    int current = head;
-    int completed = 0;
+    int current_track_position = initial_head_position;
+    int completed_requests_count = 0;
     
-    cout << "Seek Sequence: " << head;
+    cout << "Seek Sequence: " << initial_head_position;
     
-    while(completed < n) {
-        int minDist = INT_MAX;
-        int idx = -1;
+    while(completed_requests_count < number_of_requests) {
+        int minimum_seek_distance = INT_MAX;
+        int closest_request_index = -1;
         
-        for(int i=0; i<n; i++) {
-            if(!visited[i]) {
-                int dist = abs(requests[i] - current);
-                if(dist < minDist) {
-                    minDist = dist;
-                    idx = i;
+        for(int i=0; i<number_of_requests; i++) {
+            if(!is_request_processed[i]) {
+                int seek_distance = abs(request_queue[i] - current_track_position);
+                if(seek_distance < minimum_seek_distance) {
+                    minimum_seek_distance = seek_distance;
+                    closest_request_index = i;
                 }
             }
         }
         
-        if(idx != -1) {
-            visited[idx] = true;
-            total_seek_time += minDist;
-            current = requests[idx];
-            cout << " -> " << current;
-            completed++;
+        if(closest_request_index != -1) {
+            is_request_processed[closest_request_index] = true;
+            total_seek_time += minimum_seek_distance;
+            current_track_position = request_queue[closest_request_index];
+            cout << " -> " << current_track_position;
+            completed_requests_count++;
         }
     }
     

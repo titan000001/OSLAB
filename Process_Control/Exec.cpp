@@ -11,12 +11,12 @@ using namespace std;
 int main() {
     cout << "Demonstrating exec() family system call" << endl;
     
-    pid_t pid = fork();
+    pid_t process_id = fork();
     
-    if (pid < 0) {
+    if (process_id < 0) {
         cerr << "Fork failed!" << endl;
         return 1;
-    } else if (pid == 0) {
+    } else if (process_id == 0) {
         // Child process
         cout << "Child process calling execlp()..." << endl;
         

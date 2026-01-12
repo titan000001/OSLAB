@@ -5,39 +5,39 @@
 using namespace std;
 
 struct Process {
-    int id;
-    int at;
-    int bt;
-    int rem_bt;
-    int ct;
-    int tat;
-    int wt;
+    int process_id;
+    int arrival_time;
+    int burst_time;
+    int remaining_burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
 };
 
 bool compareAT(Process a, Process b) {
-    return a.at < b.at;
+    return a.arrival_time < b.arrival_time;
 }
 
 int main() {
-    int n, tq;
+    int number_of_processes, time_quantum;
     cout << "Enter number of processes: ";
-    cin >> n;
+    cin >> number_of_processes;
     cout << "Enter Time Quantum: ";
-    cin >> tq;
+    cin >> time_quantum;
 
-    vector<Process> p(n);
+    vector<Process> processes(number_of_processes);
     cout << "Enter Arrival Time and Burst Time for each process:\n";
-    for (int i = 0; i < n; i++) {
-        p[i].id = i + 1;
+    for (int i = 0; i < number_of_processes; i++) {
+        processes[i].process_id = i + 1;
         cout << "P" << i + 1 << ": ";
-        cin >> p[i].at >> p[i].bt;
-        p[i].rem_bt = p[i].bt;
+        cin >> processes[i].arrival_time >> processes[i].burst_time;
+        processes[i].remaining_burst_time = processes[i].burst_time;
     }
 
-    sort(p.begin(), p.end(), compareAT);
+    sort(processes.begin(), processes.end(), compareAT);
 
-    int currentTime = 0;
-    int completed = 0;
+    int current_time = 0;
+    int completed_processes_count = 0;
     
     // Using a simple loop approach instead of a complex queue for simplicity in exam
     // We repeatedly iterate through processes to find available ones
@@ -49,8 +49,8 @@ int main() {
     // But to match the "Simple" request, let's try the infinite loop with "visited" check or just a queue.
     // Let's use a queue, it is the standard way.
     
-    vector<int> q;
-    vector<bool> inQueue(n, false);
+    vector<int> ready_queue;
+    vector<bool> is_in_queue(number_of_processes, false);
     
     // Push first process(es)
     // We need to handle time advancement carefully.
@@ -66,24 +66,24 @@ int main() {
     
     // Let's go with the standard Queue approach.
     int idx = 0; // index to add new processes
-    q.push_back(0); // Assuming sorted and p[0] arrives at 0 or we jump time
-    inQueue[0] = true;
+    ready_queue.push_back(0); // Assuming sorted and p[0] arrives at 0 or we jump time
+    is_in_queue[0] = true;
     
-    if (p[0].at > 0) {
+    if (processes[0].arrival_time > 0) {
         // Handle case where first process doesn't start at 0
-        currentTime = p[0].at;
+        current_time = processes[0].arrival_time;
     }
     
-    while(completed < n) {
-        if (q.empty()) {
+    while(completed_processes_count < number_of_processes) {
+        if (ready_queue.empty()) {
             // No process in queue, jump to next arrival or increment
             bool found = false;
-            for(int i=0; i<n; i++) {
-                if(p[i].rem_bt > 0) {
+            for(int i=0; i<number_of_processes; i++) {
+                if(processes[i].remaining_burst_time > 0) {
                      // Find next arriving
                      // Actually, if queue is empty and processes remain, we just need to advance time to next AT
                      // For simplicity, just increment time
-                     currentTime++;
+                     current_time++;
                      found = true;
                      break; 
                 }
@@ -91,54 +91,54 @@ int main() {
             if(!found) break; // Should not happen if completed < n
             
             // Checks for new arrivals after increment
-            for(int i = 0; i < n; i++) {
-                 if(p[i].at <= currentTime && p[i].rem_bt > 0 && !inQueue[i]){
-                     q.push_back(i);
-                     inQueue[i] = true;
+            for(int i = 0; i < number_of_processes; i++) {
+                 if(processes[i].arrival_time <= current_time && processes[i].remaining_burst_time > 0 && !is_in_queue[i]){
+                     ready_queue.push_back(i);
+                     is_in_queue[i] = true;
                  }
             }
             continue;
         }
         
-        int curr = q[0];
-        q.erase(q.begin());
+        int current_process_index = ready_queue[0];
+        ready_queue.erase(ready_queue.begin());
         
-        int time_spent = min(tq, p[curr].rem_bt);
-        p[curr].rem_bt -= time_spent;
-        currentTime += time_spent;
+        int time_spent = min(time_quantum, processes[current_process_index].remaining_burst_time);
+        processes[current_process_index].remaining_burst_time -= time_spent;
+        current_time += time_spent;
         
         // Add new arrivals
-        for(int i = 0; i < n; i++) {
-            if(p[i].at <= currentTime && p[i].rem_bt > 0 && !inQueue[i]) {
-                q.push_back(i);
-                inQueue[i] = true;
+        for(int i = 0; i < number_of_processes; i++) {
+            if(processes[i].arrival_time <= current_time && processes[i].remaining_burst_time > 0 && !is_in_queue[i]) {
+                ready_queue.push_back(i);
+                is_in_queue[i] = true;
             }
         }
         
-        if(p[curr].rem_bt > 0) {
-            q.push_back(curr);
+        if(processes[current_process_index].remaining_burst_time > 0) {
+            ready_queue.push_back(current_process_index);
         } else {
-            p[curr].ct = currentTime;
-            p[curr].tat = p[curr].ct - p[curr].at;
-            p[curr].wt = p[curr].tat - p[curr].bt;
-            completed++;
+            processes[current_process_index].completion_time = current_time;
+            processes[current_process_index].turnaround_time = processes[current_process_index].completion_time - processes[current_process_index].arrival_time;
+            processes[current_process_index].waiting_time = processes[current_process_index].turnaround_time - processes[current_process_index].burst_time;
+            completed_processes_count++;
         }
     }
 
     cout << "\nProcess\tAT\tBT\tCT\tTAT\tWT\n";
-    for (int i = 0; i < n; i++) {
-        cout << "P" << p[i].id << "\t" << p[i].at << "\t" << p[i].bt << "\t" << p[i].ct << "\t" << p[i].tat << "\t" << p[i].wt << endl;
+    for (int i = 0; i < number_of_processes; i++) {
+        cout << "P" << processes[i].process_id << "\t" << processes[i].arrival_time << "\t" << processes[i].burst_time << "\t" << processes[i].completion_time << "\t" << processes[i].turnaround_time << "\t" << processes[i].waiting_time << endl;
     }
 
-    float avgTAT = 0, avgWT = 0;
-    for(int i=0; i<n; i++){
-        avgTAT += p[i].tat;
-        avgWT += p[i].wt;
+    float average_turnaround_time = 0, average_waiting_time = 0;
+    for(int i=0; i<number_of_processes; i++){
+        average_turnaround_time += processes[i].turnaround_time;
+        average_waiting_time += processes[i].waiting_time;
     }
 
     cout << "\nAverage Output:\n";
-    cout << "Average Turn Around Time: " << avgTAT/n << endl;
-    cout << "Average Waiting Time: " << avgWT/n << endl;
+    cout << "Average Turn Around Time: " << average_turnaround_time/number_of_processes << endl;
+    cout << "Average Waiting Time: " << average_waiting_time/number_of_processes << endl;
 
     return 0;
 }
